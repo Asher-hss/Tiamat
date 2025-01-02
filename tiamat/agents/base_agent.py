@@ -2,13 +2,14 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, field_validator
 from typing import Any, List, Optional, Dict
 from tiamat.tools.base_tool import BaseTool
+from tiamat.llm.base_llm import BaseLLM
 class BaseAgent(ABC, BaseModel):
     id: str
     name: str
     tool_manager: Any
     config: Optional[Dict[str, any]] = Field(default=dict)
     max_iter: Optional[int] = Field(default=3)
-    llm: Any = None
+    llm: BaseLLM= None
     memory: Any = None
     @abstractmethod
     def act(self, *args, **kwargs) -> Any:

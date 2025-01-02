@@ -1,16 +1,26 @@
 from tiamat.agents.base_agent import BaseAgent
+from typing import Any
 class Agent(BaseAgent):
     def think(self, context):
-        prompt = f"""
-        Based on the following context, generate a JSON instruction for the next action:
-        Context: {context}
-        Response format:
-        {{
-            "action": "action_name",
-            "params": {{}}
-        }}
-        """
-        response = self.llm.generate(prompt)
+        history = self.memory.retrieve()
+        
+        messages = history + [
+            {"role": "user", "content": f"""
+            Based on the following context, generate a JSON instruction for the next action:
+            Context: {context}
+            Response format:
+            {{
+                "action": "action_name",
+                "params": {{}}
+            }}
+            """}
+        ]
+
+        response = self.llm.generate(messages) 
+
+        self.memory.save({"role": "user", "content": context})
+        self.memory.save({"role": "assistant", "content": response})
+
         return eval(response)
     
     def act(self, instruction: dict, *args, **kwargs) -> Any:
